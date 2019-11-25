@@ -1,0 +1,36 @@
+.skin-blue .main-header>.navbar {
+background-color: #FF5733;
+}
+.content-wrapper,.right-side {
+background-color: white;
+}
+.skin-blue .main-header .logo {
+background-color: #FF5733;
+color: white;
+}
+.skin-blue .main-header .logo:hover {
+background-color: black;
+}
+aside.main-sidebar {
+background-color: black !important;
+}
+.tabbable > .nav > li > a {background-color: grey;  color:white}
+.tabbable > .nav > li[class=active]    > a {background-color: #FF5733; color:white}
+#question,#questionChoice{
+  font-size: 25px;
+}
+#submitX, #nextX{
+  color:white;
+  background-color: #FF5733;
+  border-color: #FF5733;
+  font-size: 20px;
+}
+#questionCha, #choiceCha{
+  font-size: 25px;
+}
+#goover, #bsButton1, #CarsDownload, #HIDownload, #CRDownload, #SADownload, 
+#CTDownload, #bsButton6,#cq1check1,#next1,#bsButton4,#cq1check2, #next2,#cq1check3, #next3,#cq1check4, #next4{
+  color:white;
+  background-color: #FF5733;
+  border-color: #FF5733;
+}
