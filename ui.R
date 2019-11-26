@@ -6,7 +6,7 @@ library(shinyDND)
 library(plotly)
 library(shinycssloaders)
 
-header = dashboardHeader(title = "NonHomogeneous Poisson Process", titleWidth = 350,
+header = dashboardHeader(title = "Nonhomogeneous Poisson Process", titleWidth = 350,
                          tags$li(class = "dropdown",
                                  tags$a(href = "https://shinyapps.science.psu.edu/",
                                         icon("home", lib = "font-awesome"))),
@@ -34,10 +34,10 @@ body = dashboardBody(
     tabItem(
       tabName = 'prerequisite', withMathJax(),
       
-      h3(strong('Background: NonHomogeneous Poisson Process')),br(),
+      h3(strong('Background: Nonhomogeneous Poisson Process')),br(),
       h4("If a point process, {N*(t);t\\(\\geqslant\\)0}, with independent increments and with N(t) being Poisson for all t with an
           average of m(t) = \\(\\int_0^t \\lambda(\\tau) \\, d \\tau\\) where \\(\\lambda(\\tau)\\) is a function
-          that represents the rate (or intensity) at time \\(\\tau\\), then this point process is called a non-homogeneous Poisson process."),
+          that represents the rate (or intensity) at time \\(\\tau\\), then this point process is called a Nonhomogeneous Poisson process."),
       br(),
       
       h4(strong("Properties: ")),
@@ -47,7 +47,7 @@ body = dashboardBody(
       h4(tags$li("The expected value of N*(t+s)-N*(t) is m(t+s)-m(t)" )),
      
       
-      h4(tags$li("If N*(t) follows a non-homogeneous Poisson process then it can be considered as a homogeneous process with a rescaling of time. Thus, N*(t) = N(m(t))
+      h4(tags$li("If N*(t) follows a Nonhomogeneous Poisson process then it can be considered as a homogeneous process with a rescaling of time. Thus, N*(t) = N(m(t))
                  where {N(t);t\\(\\geqslant\\)0} is a homogeneous Poisson process with rate 1.")),
 
       tags$img(src = 'Homo3.png', width = "537.6px", height = "144px"),
@@ -140,12 +140,12 @@ body = dashboardBody(
             
               mainPanel(
                      h4("Challenge: How does the rate and number of events influence the result respectively?"),
-                     bsPopover("plot1","Sample NonHomogeneous Poisson Plot","The lambda function you have chosen is ",
+                     bsPopover("plot1","Sample Nonhomogeneous Poisson Plot","The lambda function you have chosen is ",
                                trigger="hover",placement="top"),br(),
                      plotOutput("plot1",height = "300px")%>% withSpinner(color="#0dc5c1"),
                      
                      br(),br(),
-                     bsPopover("plot2","Sample NonHomogeneous Poisson Plot","This is a Nonhomogeneous Poisson Plot with constant rate, you could use the slider to change the number of events.This distance on the graph is N(t+s)-N(s), which is a Poisson distribution with parameter m(t+s)-m(s). m(t+s) can be calculated by integrating our lambda function from 0 to t+s, while m(s) is integrating lambda function from 0 to s.",
+                     bsPopover("plot2","Sample Nonhomogeneous Poisson Plot","This is a Nonhomogeneous Poisson Plot with constant rate, you could use the slider to change the number of events.This distance on the graph is N(t+s)-N(s), which is a Poisson distribution with parameter m(t+s)-m(s). m(t+s) can be calculated by integrating our lambda function from 0 to t+s, while m(s) is integrating lambda function from 0 to s.",
                                trigger="hover",placement="top"),br(),
                      plotOutput("plot2",height = "300px")%>% withSpinner(color="#0dc5c1"),
                      h4("Hint: Move your mouse on the graph to see more explanation."),
