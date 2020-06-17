@@ -75,23 +75,24 @@ shinyServer(function(input, output, session) {
      
       ## rate constant, n slider
       if (variable==2){
+        point <- as.integer(input$nevent/3)
       for (i in 1:input$path){
         plot(  x.value[1:i,], y.value[1:i,],
                xlab="Time", ylab="Number of Events", main = "Number of Events vs. Time",
                col = colors[1:i], pch=16)+
-          segments(x.value[1,30], 30, x.value[1,60], 30,lty=2)+
-          segments(x.value[1,30], 0,  x.value[1,30],  30,lty=2)+
-          segments(x.value[1,60],  0,  x.value[1,60],  60,lty=2)+
-          segments(x.value[1,60], 30, x.value[1,68], 30)+
-          segments(x.value[1,60], 60, x.value[1,68], 60)+
+          segments(x.value[1,point], point, x.value[1,point*2], point,lty=2)+
+          segments(x.value[1,point], 0,  x.value[1,point],  point,lty=2)+
+          segments(x.value[1,point*2],  0,  x.value[1,point*2],  point*2,lty=2)+
+          segments(x.value[1,point*2], point, x.value[1,point*2+3], point)+
+          segments(x.value[1,point*2], point*2, x.value[1,point*2+3], point*2)+
           
           
-          arrows( x.value[1,63],  30,   x.value[1,63], 60,
+          arrows( x.value[1,point*2+1],  point,   x.value[1,point*2+1], point*2,
                   length = 0.1)+
-          arrows( x.value[1,63],  60, x.value[1,63],  30,length = 0.1)+
+          arrows( x.value[1,point*2+1],  point*2, x.value[1,point*2+1],  point,length = 0.1)+
 
-        text(x.value[1,31], y = 2, labels = 's',color='blue')+
-          text(x.value[1,63], y = 2, labels = 's+t',color='blue')
+        text(x.value[1,point+1], y = 2, labels = 's',col='blue')+
+          text(x.value[1,point*2+1], y = 2, labels = 's+t',col='blue')
         
 
         for (k in 1:i){
@@ -154,7 +155,7 @@ shinyServer(function(input, output, session) {
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank()
           ) +
-          stat_density(geom = "line", size = 1)+
+            stat_density(geom = "line", size = 1,position='identity')+
           scale_y_continuous(expand = expand_scale(mult = c(0, 0.15), add = 0)) +
           scale_x_continuous(expand = expand_scale(mult = c(0, 0.05), add = 0)) +
           scale_color_manual(values = colors)})
@@ -204,28 +205,30 @@ shinyServer(function(input, output, session) {
         ## rate constant, n slider
         
         if (variable==2){
+          point <- as.integer(input$nevent/3)
           for (i in 1:input$path){
             plot(  x.value[1:i,], y.value[1:i,],
                    xlab="Time", ylab="Number of Events", main = "Number of Events vs. Time",
                    col = colors[1:i], pch=16)+
-              segments(x.value[1,30], 30, x.value[1,60], 30,lty=2)+
-              segments(x.value[1,30], 0,  x.value[1,30],  30,lty=2)+
-              segments(x.value[1,60],  0,  x.value[1,60],  60,lty=2)+
-              segments(x.value[1,60], 30, x.value[1,68], 30)+
-              segments(x.value[1,60], 60, x.value[1,68], 60)+
+              segments(x.value[1,point], point, x.value[1,point*2], point,lty=2)+
+              segments(x.value[1,point], 0,  x.value[1,point],  point,lty=2)+
+              segments(x.value[1,point*2],  0,  x.value[1,point*2],  point*2,lty=2)+
+              segments(x.value[1,point*2], point, x.value[1,point*2+3], point)+
+              segments(x.value[1,point*2], point*2, x.value[1,point*2+3], point*2)+
               
               
-              arrows( x.value[1,63],  30,   x.value[1,63], 60,
+              arrows( x.value[1,point*2+1],  point,   x.value[1,point*2+1], point*2,
                       length = 0.1)+
-              arrows( x.value[1,63],  60, x.value[1,63],  30,length = 0.1)+
-              text(x.value[1,31], y = 2, labels = 's',color='blue')+
-              text(x.value[1,63], y = 2, labels = 's+t',color='blue')
-
+              arrows( x.value[1,point*2+1],  point*2, x.value[1,point*2+1],  point,length = 0.1)+
+              
+              text(x.value[1,point+1], y = 2, labels = 's',col='blue')+
+              text(x.value[1,point*2+1], y = 2, labels = 's+t',col='blue')
+            
             
             for (k in 1:i){
               m = x.value[k,]
               y = y.value[k,]
-              lines( m[order(m)],y[order(m)], pch=16, lwd = 1.5, col = colors[k])
+              lines(m[order(m)],y[order(m)], pch=16, lwd = 1.5, col = colors[k])
             }
           }
         }
@@ -279,7 +282,7 @@ shinyServer(function(input, output, session) {
                 panel.grid.major = element_blank(),
                 panel.grid.minor = element_blank()
               ) +
-              stat_density(geom = "line", size = 1)+
+              stat_density(geom = "line", size = 1,position='identity')+
               scale_y_continuous(expand = expand_scale(mult = c(0, 0.15), add = 0)) +
               scale_x_continuous(expand = expand_scale(mult = c(0, 0.05), add = 0)) +
               scale_color_manual(values = colors)})
@@ -329,28 +332,30 @@ shinyServer(function(input, output, session) {
       ## rate constant, n slider
       
       if (variable==2){
+        point <- as.integer(input$nevent/3)
         for (i in 1:input$path){
           plot(  x.value[1:i,], y.value[1:i,],
                  xlab="Time", ylab="Number of Events", main = "Number of Events vs. Time",
                  col = colors[1:i], pch=16)+
-            segments(x.value[1,30], 30, x.value[1,60], 30,lty=2)+
-            segments(x.value[1,30], 0,  x.value[1,30],  30,lty=2)+
-            segments(x.value[1,60],  0,  x.value[1,60],  60,lty=2)+
-            segments(x.value[1,60], 30, x.value[1,68], 30)+
-            segments(x.value[1,60], 60, x.value[1,68], 60)+
+            segments(x.value[1,point], point, x.value[1,point*2], point,lty=2)+
+            segments(x.value[1,point], 0,  x.value[1,point],  point,lty=2)+
+            segments(x.value[1,point*2],  0,  x.value[1,point*2],  point*2,lty=2)+
+            segments(x.value[1,point*2], point, x.value[1,point*2+3], point)+
+            segments(x.value[1,point*2], point*2, x.value[1,point*2+3], point*2)+
             
             
-            arrows( x.value[1,63],  30,   x.value[1,63], 60,
+            arrows( x.value[1,point*2+1],  point,   x.value[1,point*2+1], point*2,
                     length = 0.1)+
-            arrows( x.value[1,63],  60, x.value[1,63],  30,length = 0.1)+
-            text(x.value[1,31], y = 2, labels = 's',color='blue')+
-            text(x.value[1,63], y = 2, labels = 's+t',color='blue')
+            arrows( x.value[1,point*2+1],  point*2, x.value[1,point*2+1],  point,length = 0.1)+
+            
+            text(x.value[1,point+1], y = 2, labels = 's',col='blue')+
+            text(x.value[1,point*2+1], y = 2, labels = 's+t',col='blue')
           
           
           for (k in 1:i){
             m = x.value[k,]
             y = y.value[k,]
-            lines( m[order(m)],y[order(m)], pch=16, lwd = 1.5, col = colors[k])
+            lines(m[order(m)],y[order(m)], pch=16, lwd = 1.5, col = colors[k])
           }
         }
       }
@@ -403,7 +408,7 @@ shinyServer(function(input, output, session) {
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank()
           ) +
-          stat_density(geom = "line", size = 1)+
+          stat_density(geom = "line", size = 1,position='identity')+
           scale_y_continuous(expand = expand_scale(mult = c(0, 0.15), add = 0)) +
           scale_x_continuous(expand = expand_scale(mult = c(0, 0.05), add = 0)) +
           scale_color_manual(values = colors)})
@@ -452,28 +457,30 @@ shinyServer(function(input, output, session) {
       ## rate constant, n slider
       
       if (variable==2){
+        point <- as.integer(input$nevent/3)
         for (i in 1:input$path){
           plot(  x.value[1:i,], y.value[1:i,],
                  xlab="Time", ylab="Number of Events", main = "Number of Events vs. Time",
                  col = colors[1:i], pch=16)+
-            segments(x.value[1,30], 30, x.value[1,60], 30,lty=2)+
-            segments(x.value[1,30], 0,  x.value[1,30],  30,lty=2)+
-            segments(x.value[1,60],  0,  x.value[1,60],  60,lty=2)+
-            segments(x.value[1,60], 30, x.value[1,68], 30)+
-            segments(x.value[1,60], 60, x.value[1,68], 60)+
+            segments(x.value[1,point], point, x.value[1,point*2], point,lty=2)+
+            segments(x.value[1,point], 0,  x.value[1,point],  point,lty=2)+
+            segments(x.value[1,point*2],  0,  x.value[1,point*2],  point*2,lty=2)+
+            segments(x.value[1,point*2], point, x.value[1,point*2+3], point)+
+            segments(x.value[1,point*2], point*2, x.value[1,point*2+3], point*2)+
             
             
-            arrows( x.value[1,63],  30,   x.value[1,63], 60,
+            arrows( x.value[1,point*2+1],  point,   x.value[1,point*2+1], point*2,
                     length = 0.1)+
-            arrows( x.value[1,63],  60, x.value[1,63],  30,length = 0.1)+
-            text(x.value[1,31], y = 2, labels = 's',color='blue')+
-            text(x.value[1,63], y = 2, labels = 's+t',color='blue')
+            arrows( x.value[1,point*2+1],  point*2, x.value[1,point*2+1],  point,length = 0.1)+
+            
+            text(x.value[1,point+1], y = 2, labels = 's',col='blue')+
+            text(x.value[1,point*2+1], y = 2, labels = 's+t',col='blue')
           
           
           for (k in 1:i){
             m = x.value[k,]
             y = y.value[k,]
-            lines( m[order(m)],y[order(m)], pch=16, lwd = 1.5, col = colors[k])
+            lines(m[order(m)],y[order(m)], pch=16, lwd = 1.5, col = colors[k])
           }
         }
       }
@@ -526,7 +533,7 @@ shinyServer(function(input, output, session) {
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank()
           ) +
-          stat_density(geom = "line", size = 1)+
+          stat_density(geom = "line", size = 1,position='identity')+
           scale_y_continuous(expand = expand_scale(mult = c(0, 0.15), add = 0)) +
           scale_x_continuous(expand = expand_scale(mult = c(0, 0.05), add = 0)) +
           scale_color_manual(values = colors)})
