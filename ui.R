@@ -150,29 +150,14 @@ body = dashboardBody(
             
               mainPanel(
                      p("Note: Individual paths are coded by color."),
-                     # uiOutput("popover"),
-                    # bsPopover("plot1","Sample Nonhomogeneous Poisson Plot","The lambda function you have chosen is ",
-                    #           trigger="hover",placement="top"),
                      br(),
                      plotOutput("plot1",height = "300px")%>% withSpinner(color="#0dc5c1"),
-                     
                      br(),
-                     # bsPopover("plot2","Sample Nonhomogeneous Poisson Plot","This is a Nonhomogeneous Poisson Plot with constant rate, you could use the slider to change the number of events.This distance on the graph is N(t+s)-N(s), which is a Poisson distribution with parameter m(t+s)-m(s). m(t+s) can be calculated by integrating our lambda function from 0 to t+s, while m(s) is integrating lambda function from 0 to s.",
-                     #           trigger="hover",placement="top"),br(),
                      plotOutput("plot2",height = "300px")%>% withSpinner(color="#0dc5c1"),
                      textOutput("plot2Text"),
                      br(),
-                     # bsPopover("plot3","Residuals Plot","This is a Nonhomogeneous Poisson Plot with constant rate, you could use the slider to change the number of events.",
-                     #           trigger="hover",placement="top"),br(),
                      plotOutput("plot3",height = "300px")%>% withSpinner(color="#0dc5c1"),
-                     
                      br(),
-                     # bsPopover("plot4","Interarrival Time Distribution","This plot shows the distribution of interarrival times. From the plot it is
-                     #                easy to see that interarrival times roughly follow exponential distribution.",
-                     #           trigger="hover",placement="top"),br(),
-                     # plotOutput("plot4",height = "500px")%>% withSpinner(color="#0dc5c1")
-                    # bsPopover("plot4","Interarrival Time Distribution","This plot shows the distribution of interarrival times. From the plot it is easy to see that interarrival times roughly follow exponential distribution.",
-                              # trigger="hover",placement="top"),br(),
                     plotOutput("plot4",height = "300px")%>% withSpinner(color="#0dc5c1"),
                      br(),
                      textOutput("feedback"),
@@ -182,7 +167,6 @@ body = dashboardBody(
                                  }"
                      )
                      )
-                    
                      )
               )
             )
@@ -206,10 +190,14 @@ body = dashboardBody(
                           ),
                           
                           tabPanel(title = "Practice Mode", value = "fib",
-                            
+                                   p("For each plot, use the drop down to select which 
+                                     lambda function was used to generate the path shown.
+                                     You get 1 point for each correct answer with a .5
+                                     point penalty on your problem score for every 
+                                     incorrect guess."),
+                                   br(),
                                    fluidRow(
                                      column(actionButton("resetPractice", "Reset"),
-                                      
                                        p("Select which intensity function matches the graph."), width=8),
                                      column(width=4,
                                             textOutput("score"))
@@ -234,6 +222,14 @@ body = dashboardBody(
                                        bsButton(inputId = 'nextX', label = 'Next',size = 'median'))
                           ),
                           tabPanel(title = "Timed Mode", value = "time",
+                                   p("To begin the game, click the Start Game button.
+                                   Then, for each plot, use the drop down to select which 
+                                     lambda function was used to generate the path shown.
+                                     You get 1 point for each correct answer with a .5
+                                     point penalty on your problem score for every 
+                                     incorrect guess. You will have 60 seconds to try to
+                                     get as many points as possible."),
+                                   br(),
                                    fluidRow(
                                      column(actionButton("startTimedGame", "Start Game"),
                                             actionButton("resetTimedGame", "Reset Game"),
