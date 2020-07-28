@@ -181,8 +181,10 @@ dashboardBody(
                      br(),
                      plotOutput("plot1",height = "300px")%>% 
                        withSpinner(color="#0dc5c1"),
+                     htmlOutput("plot1Alt"),
                      br(),
-                     plotOutput("plot2",height = "300px")%>% withSpinner(color="#0dc5c1"),
+                     plotOutput("plot2",height = "300px") %>% 
+                       withSpinner(color="#0dc5c1"),
                      tags$script(HTML(
                        "$(document).ready(function() {
             document.getElementById('plot2').setAttribute('aria-labelledby',
@@ -192,9 +194,22 @@ dashboardBody(
                      br(),
                      plotOutput("plot3",height = "300px")%>% 
                        withSpinner(color="#0dc5c1"),
+                     tags$script(HTML(
+                       "$(document).ready(function() {
+                        document.getElementById('plot3').setAttribute('aria-label',
+                        `This plot shows the residuals of the trial plotted over time.`)
+                      })"
+                     )),
                      br(),
                     plotOutput("plot4",height = "300px")%>% 
                       withSpinner(color="#0dc5c1"),
+                    tags$script(HTML(
+                      "$(document).ready(function() {
+                        document.getElementById('plot4').setAttribute('aria-label',
+                        `This plot shows an approximation of the density of the 
+                        times between arrivals of the current run.`)
+                      })"
+                    )),
                     ))) 
             ),
     
@@ -259,7 +274,9 @@ dashboardBody(
                   column(width=2, textOutput("score")),
                   column(width=2, actionButton("resetPractice", "Reset"))
                   ),
-                plotOutput("gamePlot2")),
+                plotOutput("gamePlot2"),
+                htmlOutput("gamePracticePlotAlt")
+                ),
                 
                 tabPanel(title = "Timed Mode", value = "time",
                 br(),
@@ -310,9 +327,9 @@ dashboardBody(
                 conditionalPanel(
                   condition="output.showGame",
                   br(),
-                  plotOutput("plot2T")
+                  plotOutput("plot2T"),
+                  htmlOutput("gameTimedPlotAlt")
                   )
-                
                 ))
               ),
     # References tab
@@ -363,8 +380,5 @@ dashboardBody(
         "Wickham, H. (2016), ggplot2: Elegant graphics for data analysis, 
         R Package, New York: Springer-Verlag. Available from 
         https://ggplot2.tidyverse.org")))
-),
-# tabItem(
-#   tabName = "FakeTab",
-# uiOutput("showGame"))
+)
 )

@@ -41,12 +41,10 @@ shinyServer(function(input, output, session) {
   
   # Description (if checkbox is checked)
   output$design <- renderUI({
-    #if(input$designcheckbox){
       p(withMathJax("This plot was generated from an exponential prior 
       distribution. X-axis represents t and Y-axis represents N(t). In the plot, 
       you can see that the rate \\(\\lambda\\) multiplied by time (t) roughly 
       equals to the number of events up to t (N(t))."))
-    #}
   })
   
   # Go button for game
@@ -254,16 +252,15 @@ shinyServer(function(input, output, session) {
   })
   
   # Text to go with second plot
-  output$plot2Text <- renderUI({#withMathJax()
+  output$plot2Text <- renderUI({
   p(withMathJax("
            The above Number of Events vs. Time plot is for a Nonhomogeneous Poisson 
-           Plot.In the plot, 
-           you can see that the rate \\(\\lambda\\) multiplied by time (t) roughly 
-           equals to the number of events up to t (N(t)). The distance between 
-           points on the graph is N(t+s)-N(s), which is a Poisson distribution with 
-           parameter m(t+s)-m(s). m(t+s) can be calculated by integrating our 
-           lambda function from 0 to t+s, while m(s) is integrating the lambda 
-           function from 0 to s.") )})
+           Plot. In the plot, you can see that the rate \\(\\lambda\\) multiplied 
+           by time (t) roughly equals to the number of events up to t (N(t)). The 
+           distance between points on the graph is N(t+s)-N(s), which is a Poisson 
+           distribution with parameter m(t+s)-m(s). m(t+s) can be calculated by 
+           integrating our lambda function from 0 to t+s, while m(s) is integrating 
+           the lambda function from 0 to s."))})
   
   # Residual Plot
   output$plot3 <- renderPlot({
@@ -600,6 +597,10 @@ shinyServer(function(input, output, session) {
     invalidateLater(1000)
     isolate(
       if(timer$run){
+        # Pauses the game if the user switches off the game tab
+        if(input$game != "time" || input$tabs != "Game"){
+          click("stopTimedGame")
+        }
         timer$value <- timer$value-1
         # What to do when time runs out
         if(timer$value==-1){
@@ -616,7 +617,6 @@ shinyServer(function(input, output, session) {
             text = ifelse(score$valT<5, "Try again for a better score.", 
                           ifelse(score$valT<10, "Good work",
                                  "Great Job!"))
-            
           )
         }}
     )
@@ -639,15 +639,11 @@ shinyServer(function(input, output, session) {
   
   # Stop button for timed game
   observeEvent(input$stopTimedGame, {
-    #timer$value <- 60
     shinyjs::enable("submitT")
     shinyjs::enable("nextT")
     shinyjs::disable("stopTimedGame")
     shinyjs::enable("resetTimedGame")
     shinyjs::enable("startTimedGame")
-    #shinyjs::enable("")
-    #score$valT <- 0
-    #score$probT <- 1
     timer$run <- FALSE
     timer$paused <- TRUE
   })
@@ -659,11 +655,9 @@ shinyServer(function(input, output, session) {
     shinyjs::enable("submitT")
     shinyjs::enable("nextT")
     shinyjs::enable("startTimedGame")
-    #shinyjs::enable("")
     score$valT <- 0
     score$probT <- 1
     timer$paused <- FALSE
-    #timer$run <- FALSE
   })
   
   # Reset button for practice mode
@@ -681,5 +675,39 @@ shinyServer(function(input, output, session) {
   
   # Tells UI whether or not to show the timed game game portion
   output$showGame <- reactive({timer$run})
-  outputOptions(output, "showGame", suspendWhenHidden=FALSE) # THIS LINE IS THE PROBLEM
+  outputOptions(output, "showGame", suspendWhenHidden=FALSE) 
+  
+  
+  # Alt text 
+  output$plot1Alt <- renderUI({
+    text <- paste("`This plot shows a ", input$lambdatype, "function, which 
+                  represents that intensity function for the graph.`")
+    tags$script(HTML(paste0("$(document).ready(function() { 
+                            document.getElementById('plot1').setAttribute('aria-label',",
+                            text, ")})"))
+  )
+      })
+  
+  output$gamePracticePlotAlt <- renderUI({
+    arrivalTimes <- toString(round(dataGame()$x.value, 2))
+    tags$script(HTML(
+      paste0("$(document).ready(function() {
+            document.getElementById('gamePlot2').setAttribute('aria-label',
+            `This plot shows the path taken by the run generated for
+            the problem. For this problem, the arrival times are ",  
+            arrivalTimes, "`)})"
+    )))
+  })
+  
+  output$gameTimedPlotAlt <- renderUI({
+    arrivalTimes <- toString(round(dataGame()$x.value, 2))
+    tags$script(HTML(
+      paste0("$(document).ready(function() {
+            document.getElementById('plot2T').setAttribute('aria-label',
+            `This plot shows the path taken by the run generated for
+            the problem. For this problem, the arrival times are ",  
+             arrivalTimes, "`)})"
+      )))
+  })
+  
 })
