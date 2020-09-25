@@ -24,11 +24,14 @@ dashboardHeader(title = "Nonhomogeneous Pois.", titleWidth = 250,
 dashboardSidebar(
   width=250,
   sidebarMenu(id = 'tabs', 
-              menuItem("Overview", tabName = "overview", icon = icon("tachometer-alt")),
-              menuItem('Prerequisites', tabName = 'prerequisite', icon = icon('book')),
+              menuItem("Overview", tabName = "overview", 
+                       icon = icon("tachometer-alt")),
+              menuItem('Prerequisites', tabName = 'prerequisite', 
+                       icon = icon('book')),
               menuItem('Explore', tabName = "exp", icon = icon('wpexplorer')),
               menuItem("Game", tabName = "Game", icon = icon("gamepad")),
-              menuItem("References", tabName = "References", icon = icon("leanpub"))
+              menuItem("References", tabName = "References", 
+                       icon = icon("leanpub"))
               ),
   tags$div(
     class = "sidebar-logo",
@@ -72,33 +75,32 @@ dashboardBody(
             h2("Acknowledgements:"),
                p("This app was coded and developed by Shubo Sun and Shunqi Zhang 
                  and was reformatted by Leah Hunt."),
-               p("Special thanks to Dr. Pearl for giving useful and supportive 
-                 suggestions throughout the program."),
             br(),
             br(),
             br(),
-            div(class = "updated", "Last Update: 7/15/2020 by LMH.")
+            div(class = "updated", "Last Update: 9/24/2020 by LMH.")
             ),
     
     tabItem(
       tabName = 'prerequisite', withMathJax(),
       
       h2('Prerequisites'),br(),
-      p("If a point process, \\(\\left\\{N^*(t);\\;t\\geq0\\right\\}\\), with independent 
-      increments and with \\(N(t)\\) being Poisson for all ", tags$em("t"), " with an average of 
-      \\(m(t) = \\int_0^t\\lambda(\\tau)\\, d\\tau\\) where \\(\\lambda(\\tau)\\)
-      is a function that represents the rate (or intensity) at time \\(\\tau\\), 
-        then this point process is called a Nonhomogeneous Poisson process."),
+      p("If a point process, \\(\\left\\{N^*(t);\\;t\\geq0\\right\\}\\), with 
+      independent increments and with \\(N(t)\\) being Poisson for all ", 
+      tags$em("t"), " with an average of \\(m(t) = \\int_0^t\\lambda(\\tau)\\, 
+      d\\tau\\) where \\(\\lambda(\\tau)\\) is a function that represents the 
+      rate (or intensity) at time \\(\\tau\\), then this point process is called 
+      a Nonhomogeneous Poisson process."),
       br(),
       
       h3("Properties"),
       tags$ul(
       tags$li("\\(N(0)=0\\)"),
-      tags$li("The expected value of \\(N^*(t+s)-N^*(t)\\) is \\(m(t+s) - m(t)\\)" ),
-      tags$li("If \\(N^*(t)\\) follows a Nonhomogeneous Poisson process then it can be 
-      considered as a homogeneous process with a rescaling of time. 
-      Thus, \\(N^*(t)=N(m(t))\\) where \\(\\left\\{N(t);\\;t\\geq0\\right\\}\\) is a homogeneous 
-              Poisson process with rate 1.")),
+      tags$li("The expected value of \\(N^*(t+s)-N^*(t)\\) is \\(m(t+s) - m(t)\\)"),
+      tags$li("If \\(N^*(t)\\) follows a Nonhomogeneous Poisson process then it 
+      can be considered as a homogeneous process with a rescaling of time. 
+      Thus, \\(N^*(t)=N(m(t))\\) where \\(\\left\\{N(t);\\;t\\geq0\\right\\}\\) 
+      is a homogeneous Poisson process with rate 1.")),
       
       tags$img(src = 'Homo3.png', 
                alt="This image illustrates interarrival times as the time between
@@ -217,30 +219,33 @@ dashboardBody(
             tabItem(
               tabName="Game",
               tabsetPanel(id = "game",
-                tabPanel(title = "Instructions", value = "instr",
-                         fluidPage(theme = 'Muted',
-                                   titlePanel('Instructions'),
-                                   p("Use the drop down to indicate which lambda
-                                   function the graph shows. You can play either 
-                                   in practice mode, which is untimed, or in game 
-                                   mode, which is timed."),
-                                   p("For practice mode, for each plot, use the drop down to select which lambda 
-                function was used to generate the path shown. You get 1 point 
-                for each correct answer with a .5 point penalty on your problem 
-                score for every incorrect guess."),
-                                   p("For the timed game, to begin the game, click the Start Game button. Then, for 
-                each plot, use the drop down to select which lambda function was 
-                used to generate the path shown. You get 1 point for each correct 
-                answer with a .5 point penalty on your problem score for every 
-                incorrect guess. You will have 60 seconds to try to get as many 
-                  points as possible."),
-                                   
-                                   br(),
-                                   div(style = "text-align: center",
-                                       bsButton(inputId = "bsButton4",
-                                                label = "GO!", 
-                                                icon('bolt'),  
-                                                size = "median")))
+                tabPanel(
+                  title = "Instructions", 
+                  value = "instr",
+                  fluidPage(
+                    theme = 'Muted',
+                    titlePanel('Instructions'),
+                    p("Use the drop down to indicate which lambda function the 
+                    graph shows. You can play either in practice mode, which is 
+                    untimed, or in game mode, which is timed."),
+                    p("For practice mode, for each plot, use the drop down to 
+                    select which lambda function was used to generate the path 
+                    shown. You get 1 point for each correct answer with a .5 
+                    point penalty on your problem score for every incorrect 
+                  ` guess."),
+                    p("For the timed game, to begin the game, click the Start 
+                    Game button. Then, for each plot, use the drop down to select 
+                    which lambda function was used to generate the path shown. 
+                    You get 1 point for each correct answer with a .5 point 
+                    penalty on your problem score for every incorrect guess. You 
+                    will have 60 seconds to try to get as many points as 
+                      possible."),
+                    br(),
+                    div(style = "text-align: center",
+                        bsButton(inputId = "bsButton4",
+                                 label = "GO!", 
+                                 icon('bolt'),  
+                                 size = "large")))
                          ),
                 tabPanel(title = "Practice Mode", value = "fib",
                 br(),
@@ -257,22 +262,21 @@ dashboardBody(
                                                                     "inverse"),
                                                         selectize = TRUE)),
                            column(width=3,  br(), bsButton(inputId = 'submitX', 
-                                                           label = 'Check Answer',
-                                                           size = 'median')),
+                                                           label = 'Check Answer')),
                            column(width=2,  br(), bsButton(inputId = 'nextX', 
-                                                           label = 'Next',
-                                                           size = 'median')),
+                                                           label = 'Next')),
                            column(width=1)),
                          
                          conditionalPanel('input.submit != 0',
                                           fluidRow(
-                                            column(width=1, htmlOutput('challengeFeedback')),
-                                            column(width=2, htmlOutput('textFeedback')),
-                                            column(width = 9)
+                                            column(width=1, 
+                                                   htmlOutput('challengeFeedback')),
+                                            column(width=11, 
+                                                   htmlOutput('textFeedback'))
                                           )),
                   ),
                   column(width=2, textOutput("score")),
-                  column(width=2, actionButton("resetPractice", "Reset"))
+                  column(width=2, bsButton("resetPractice", "Reset"))
                   ),
                 plotOutput("gamePlot2"),
                 htmlOutput("gamePracticePlotAlt")
@@ -301,28 +305,28 @@ dashboardBody(
                                                              "inverse"),
                                                  selectize = TRUE)),
                     column(width=3,  br(), bsButton(inputId = 'submitT', 
-                                                   label = 'Check Answer',
-                                                   size = 'median')),
-                    column(width=2,  br(), bsButton(inputId = 'nextT', 
-                                                   label = 'Next',
-                                                   size = 'median')),
-                    column(width=1)),
+                                                   label = 'Check Answer')),
+                    column(width=3,  br(), bsButton(inputId = 'nextT', 
+                                                   label = 'Next')),
                     
                     conditionalPanel('input.submitT != 0',
                                      fluidRow(
-                                       column(width=1, htmlOutput('challengeFeedbackT')),
-                                       column(width=2, htmlOutput('textFeedbackT')),
-                                       column(width = 9)
-                                     ),
+                                       column(width=1, 
+                                              htmlOutput('challengeFeedbackT')),
+                                       column(width=11, 
+                                              htmlOutput('textFeedbackT'))
+                                     )
                                      ))
-                  )),
+                  ))),
                   
                   column(width=2,
                          textOutput("scoreT"),
                          textOutput("countdown")),
-                  column(actionButton("startTimedGame", "Start Game"),
-                         actionButton("stopTimedGame", "Pause Game", disable=TRUE),
-                         actionButton("resetTimedGame", "Reset Game"),
+                  column(bsButton("startTimedGame", "Start Game"),
+                         bsButton("stopTimedGame", 
+                                      "Pause Game", 
+                                      disable=TRUE),
+                         bsButton("resetTimedGame", "Reset Game"),
                          width=2)),
                 conditionalPanel(
                   condition="output.showGame",

@@ -3,16 +3,15 @@ library(shinydashboard)
 library(ggplot2)
 library(shinyWidgets)
 
-# Reactive Values to score game information
-score <- reactiveValues(val=0, prob=1, valT=0, probT=1)
-timer <- reactiveValues(run=FALSE, value=60, paused=FALSE)
-params <- reactiveValues(constant=1, lambdatype="constant", 
-                       slope=1, growth=1, coefficient=.05)
 nevent <- 50
 
-colors <- c("#0072B2","#D55E00","#009E73","#ce77a8","#E69F00") # Colors for plots
-
 shinyServer(function(input, output, session) {
+  # Reactive Values to score game information
+  score <- reactiveValues(val=0, prob=1, valT=0, probT=1)
+  timer <- reactiveValues(run=FALSE, value=90, paused=FALSE)
+  params <- reactiveValues(constant=1, lambdatype="constant", 
+                           slope=1, growth=1, coefficient=.05)
+  
   # Explore Button
   observeEvent(input$goover, {
     updateTabItems(session, "tabs", "exp")
@@ -54,15 +53,19 @@ shinyServer(function(input, output, session) {
   data <- reactive({
     # linear lambda function: t/3
     if (input$lambdatype=='linear'){
-      timeFun <- function(y, time)(sqrt((2/input$slope)*(y+(input$slope/2)*time^2)))}
+      timeFun <- function(y, time){
+        (sqrt((2/input$slope)*(y+(input$slope/2)*time^2)))}}
     
     # exponential lambda function: exp{3t}
     else if (input$lambdatype=='exponential'){
-      timeFun <- function(y, time)(1/input$growth)*log(input$growth*y+exp(input$growth*time))}
+      timeFun <- function(y, time){(
+        1/input$growth)*log(input$growth*y+exp(input$growth*time))}}
     
     # inverse lambda function: 1/1+3t
     else if (input$lambdatype=='inverse'){
-      timeFun <- function(y, time)(((1+input$coefficient*time)*exp(input$coefficient*y)-1)/input$coefficient)}
+      timeFun <- function(y, time){
+        (((1+input$coefficient*time)*
+            exp(input$coefficient*y)-1)/input$coefficient)}}
     
     # constant lambda function: 3
     else if (input$lambdatype=='constant'){
@@ -72,25 +75,25 @@ shinyServer(function(input, output, session) {
     }
     
     # Set up matrices to hold all simulated values
-    x.value = matrix(0, nrow = input$path, ncol = input$nevent)
-    y.value = matrix(0, nrow = input$path, ncol = input$nevent)
-    resi.value = matrix(0, nrow = input$path, ncol = input$nevent)
+    xValue <- matrix(0, nrow = input$path, ncol = input$nevent)
+    yValue <- matrix(0, nrow = input$path, ncol = input$nevent)
+    resiValue <- matrix(0, nrow = input$path, ncol = input$nevent)
     
     # Run simulation for each path
     for (j in 1:input$path){
-      Y=rexp(input$nevent,1)
-      newtime=0
-      x=NULL
-      i=1
+      Y <- rexp(input$nevent,1)
+      newtime <- 0
+      x <- NULL
+      i <- 1
       # Create data by moving through time
       while (i<(input$nevent+1)){
-        time=newtime
+        time <- newtime
         x <- append(x,timeFun(Y[i], time))
-        newtime=timeFun(Y[i], time)
-        i=i+1
+        newtime <- timeFun(Y[i], time)
+        i <- i+1
       }
-      m = x
-      h = 1:input$nevent
+      m <- x
+      h <- 1:input$nevent
       int_lambda <- NULL
       # Take integrals of intensity function
       for (k in m){
@@ -98,12 +101,12 @@ shinyServer(function(input, output, session) {
                            integrate(intensity(), lower = 0, upper = k)$value)
       }
       resi <- (h-int_lambda)
-      x.value[j,] <- m
-      y.value[j,] <- h
-      resi.value[j,] <- resi
+      xValue[j,] <- m
+      yValue[j,] <- h
+      resiValue[j,] <- resi
     }
     # returns a data frame with the three values to be used in the various plots
-    list(x.value=x.value, y.value=y.value, resi.value=resi.value)
+    list(xValue=xValue, yValue=yValue, resiValue=resiValue)
   })
   
   # Gives the intensity function
@@ -133,7 +136,7 @@ shinyServer(function(input, output, session) {
       xlab("Time (t)") +
       ylab("Lambda(t)") +
       ggtitle("Intensity Function") +
-      scale_x_continuous(limits = c(0, max(data()$x.value)*1.1), 
+      scale_x_continuous(limits = c(0, max(data()$xValue)*1.1), 
                          expand = expansion(mult = 0, add = c(0,0.05))) +
       theme_bw() +
       theme(axis.text = element_text(size=18),
@@ -155,22 +158,22 @@ shinyServer(function(input, output, session) {
   # Plot events
   output$plot2 <- renderPlot({
     # Set up data
-    x.value <- data()$x.value
-    y.value <- data()$y.value
+    xValue <- data()$xValue
+    yValue <- data()$yValue
     point <- ceiling(input$nevent/3)
     x <- NULL
     y <- NULL
     grp <- NULL
     for(i in 1:input$path){
-      x <- c(x, x.value[i,])
-      y <- c(y, y.value[i,])
+      x <- c(x, xValue[i,])
+      y <- c(y, yValue[i,])
       grp <- c(grp, rep(i, input$nevent))
     }
-    data <- data.frame(x.value=x, y.value=y, group=grp)
+    data <- data.frame(xValue=x, yValue=y, group=grp)
 
     # Plot each path
-    plot <- ggplot(aes(x=x.value, 
-                     y=y.value, 
+    plot <- ggplot(aes(x=xValue, 
+                     y=yValue, 
                      group=as.factor(group), 
                      color=as.factor(group)), 
                  data=data) +
@@ -188,62 +191,62 @@ shinyServer(function(input, output, session) {
         plot.caption = element_text(hjust = 0, size=14),
         legend.position="none"
       ) +
-      scale_y_continuous(limits = c(0, max(y.value)*1.1), 
+      scale_y_continuous(limits = c(0, max(yValue)*1.1), 
                          expand = expansion(mult = 0, add = c(0,0.05))) +
-      scale_x_continuous(limits = c(0, max(x.value)*1.1), 
+      scale_x_continuous(limits = c(0, max(xValue)*1.1), 
                          expand = expansion(mult = 0, add = c(0,0.05))) +
-      scale_color_manual(values = colors)
+      scale_color_manual(values = boastPalette[c(1:4, 6)])
     # Only include the s and s+t if there are at least 2 events
     if(input$nevent>1){
       plot <- plot+
         geom_path()+
-        geom_segment(aes(x=x.value[point], 
+        geom_segment(aes(x=xValue[point], 
                          y=point, 
-                         xend=x.value[point*2], 
+                         xend=xValue[point*2], 
                          yend=point), color="black", 
                      linetype=2)+
-        geom_segment(aes(x=x.value[point], 
+        geom_segment(aes(x=xValue[point], 
                          y=point/2,  
-                         xend=x.value[point], 
+                         xend=xValue[point], 
                          yend= point), 
                      color="black", 
                      linetype=2)+
-        geom_segment(aes(x=x.value[point*2],  
+        geom_segment(aes(x=xValue[point*2],  
                          y=point/2,  
-                         xend=x.value[point*2], 
+                         xend=xValue[point*2], 
                          yend=point*2), 
                      color="black", 
                      linetype=2)+
-        geom_segment(aes(x=x.value[point*2], 
+        geom_segment(aes(x=xValue[point*2], 
                          y=point, 
-                         xend=x.value[point*2]+max(x.value)*.1, 
+                         xend=xValue[point*2]+max(xValue)*.1, 
                          yend=point),
                      color="black", 
                      size=.75)+
-        geom_segment(aes(x=x.value[point*2], 
+        geom_segment(aes(x=xValue[point*2], 
                          y=point*2, 
-                         xend=x.value[point*2]+max(x.value)*.1, 
+                         xend=xValue[point*2]+max(xValue)*.1, 
                          yend=point*2), 
                      color="black", 
                      size=.75)+
-        geom_segment(aes(x=x.value[point*2]+max(x.value)*.05,  
+        geom_segment(aes(x=xValue[point*2]+max(xValue)*.05,  
                          y=point,   
-                         xend=x.value[point*2]+max(x.value)*.05,
+                         xend=xValue[point*2]+max(xValue)*.05,
                          yend= point*2),
                      arrow=arrow(length=unit(.4,"cm")), 
                      color="black", 
                      size=.75)+
-        geom_segment(aes(x=x.value[point*2]+max(x.value)*.05,  
-                         y=point*2, xend=x.value[point*2]+max(x.value)*.05,  
+        geom_segment(aes(x=xValue[point*2]+max(xValue)*.05,  
+                         y=point*2, xend=xValue[point*2]+max(xValue)*.05,  
                          yend=point),
                      arrow=arrow(length=unit(.4,"cm")), 
                      color="black", 
                      size=.75)+
-        geom_text(aes(x.value[point], 
+        geom_text(aes(xValue[point], 
                       y = point/3, 
                       label = 's'),
                   color="black")+
-        geom_text(aes(x.value[point*2]+.01*max(x.value), 
+        geom_text(aes(xValue[point*2]+.01*max(xValue), 
                       y = point/3,
                       label = 's+t'),
                   color="black")
@@ -265,21 +268,21 @@ shinyServer(function(input, output, session) {
   # Residual Plot
   output$plot3 <- renderPlot({
     # Get data values
-    x.value <- data()$x.value
-    resi.value <- data()$resi.value
+    xValue <- data()$xValue
+    resiValue <- data()$resiValue
     x <- NULL
     y <- NULL
     grp <- NULL
     for(i in 1:input$path){
-      x <- c(x, x.value[i,])
-      y <- c(y, resi.value[i,])
+      x <- c(x, xValue[i,])
+      y <- c(y, resiValue[i,])
       grp <- c(grp, rep(i, input$nevent))
     }
-    data <- data.frame(x.value=x, y.value=y, group=grp)
+    data <- data.frame(xValue=x, yValue=y, group=grp)
 
     # Plot each path
-    plot <- ggplot(aes(x=x.value, 
-                     y=y.value, 
+    plot <- ggplot(aes(x=xValue, 
+                     y=yValue, 
                      group=as.factor(group), 
                      color=as.factor(group)), 
                  data=data) +
@@ -296,8 +299,8 @@ shinyServer(function(input, output, session) {
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         legend.position="none") +
-      scale_color_manual(values = colors)+
-      scale_x_continuous(limits = c(0, max(x.value)*1.1), 
+      scale_color_manual(values = boastPalette[c(1:4, 6)])+
+      scale_x_continuous(limits = c(0, max(xValue)*1.1), 
                          expand = expansion(mult = 0, add = c(0,0.05))) 
     
     if(input$nevent>1){
@@ -309,23 +312,23 @@ shinyServer(function(input, output, session) {
   # Density Plot
   output$plot4 <- renderPlot({
     # Set up data frames
-    arr = cbind(matrix(0,nrow=input$path,ncol=1),data()$x.value)
-    inter.arr = data.frame()
-    Int = data.frame()
-    Group = data.frame()
+    arr <- cbind(matrix(0,nrow=input$path,ncol=1),data()$xValue)
+    interArr <- data.frame()
+    Int <- data.frame()
+    Group <- data.frame()
     
     # Fill in intervals and path number data frame for plotting
     for (i in 1:input$path){
       for (j in 1:input$nevent){
-        Int[j + input$nevent*(i - 1), 1] = arr[i,j+1] - arr[i,j]
-        Group[j + input$nevent*(i - 1), 1] = i
+        Int[j + input$nevent*(i - 1), 1] <- arr[i,j+1] - arr[i,j]
+        Group[j + input$nevent*(i - 1), 1] <- i
       }
-      inter.arr = cbind(Int,Group)
+      interArr <- cbind(Int,Group)
     }
-    names(inter.arr) = c("Int","Group")
+    names(interArr) <- c("Int","Group")
     
     # Create actual plot
-    plot <- ggplot(inter.arr,
+    plot <- ggplot(interArr,
            aes(
              x = Int,
              group = Group,
@@ -347,7 +350,7 @@ shinyServer(function(input, output, session) {
       ) +
       scale_y_continuous(expand = expansion(mult = c(0, 0.05), add = 0)) +
       scale_x_continuous(expand = expansion(mult = c(0, 0.05), add = 0)) +
-      scale_color_manual(values = colors)
+      scale_color_manual(values = boastPalette[c(1:4, 6)])
       if(input$nevent>1){
         plot <- plot + stat_density(geom = "line", size = 1,position='identity')
       }
@@ -363,39 +366,43 @@ shinyServer(function(input, output, session) {
   dataGame <- reactive({
     # linear lambda function: t/3
     if (params$lambdatype=='linear'){
-      timeFun <- function(y, time)(sqrt((2/params$slope)*(y+(params$slope/2)*time^2)))}
+      timeFun <- function(y, time){
+        (sqrt((2/params$slope)*(y+(params$slope/2)*time^2)))}}
 
     # exponential lambda function: exp{3t}
     else if (params$lambdatype=='exponential'){
-      timeFun <- function(y, time)(1/params$growth)*log(params$growth*y+exp(params$growth*time))}
+      timeFun <- function(y, time){
+        (1/params$growth)*log(params$growth*y+exp(params$growth*time))}}
 
     # inverse lambda function: 1/1+3t
     else if (params$lambdatype=='inverse'){
-      timeFun <- function(y, time)(((1+params$coefficient*time)*exp(params$coefficient*y)-1)/params$coefficient)}
+      timeFun <- function(y, time){
+        ((1+params$coefficient*time)*exp(params$coefficient*y)-1)/
+          params$coefficient}}
 
     # constant lambda function: 3
     else if (params$lambdatype=='constant'){
       timeFun <- function(y, time)((y/params$constant)+time)}
 
     # Set up matrices to hold all simulated values
-    x.value = matrix(0, nrow = 1, ncol = nevent)
-    y.value = matrix(0, nrow = 1, ncol = nevent)
-    resi.value = matrix(0, nrow = 1, ncol = nevent)
+    xValue <- matrix(0, nrow = 1, ncol = nevent)
+    yValue <- matrix(0, nrow = 1, ncol = nevent)
+    resiValue <- matrix(0, nrow = 1, ncol = nevent)
 
     # Run simulation for each path
-    Y=rexp(nevent,1)
-    newtime=0
-    x=NULL
-    i=1
+    Y <- rexp(nevent,1)
+    newtime <- 0
+    x <- NULL
+    i <- 1
     # Create data by moving through time
     while (i<(nevent+1)){
-      time=newtime
+      time <- newtime
       x <- append(x,timeFun(Y[i], time))
-      newtime=timeFun(Y[i], time)
-      i=i+1
+      newtime <- timeFun(Y[i], time)
+      i <- i+1
     }
-    m = x
-    h = 1:nevent
+    m <- x
+    h <- 1:nevent
     int_lambda <- NULL
     # Take integrals of intensity function
     for (k in m){
@@ -403,11 +410,11 @@ shinyServer(function(input, output, session) {
                          integrate(intensityGame(), lower = 0, upper = k)$value)
     }
     resi <- (h-int_lambda)
-    x.value[1,] <- m
-    y.value[1,] <- h
-    resi.value[1,] <- resi
+    xValue[1,] <- m
+    yValue[1,] <- h
+    resiValue[1,] <- resi
     # returns a data frame with the three values to be used in the various plots
-    list(x.value=x.value, y.value=y.value, resi.value=resi.value)
+    list(xValue=xValue, yValue=yValue, resiValue=resiValue)
   })
 
   # Gives the intensity function
@@ -441,17 +448,17 @@ shinyServer(function(input, output, session) {
   # Makes actual plot for game section
   makePlot <- reactive({    
     # Set up data
-    x.value <- dataGame()$x.value
-    y.value <- dataGame()$y.value
+    xValue <- dataGame()$xValue
+    yValue <- dataGame()$yValue
     point <- ceiling(nevent/3)
     x <- NULL
     y <- NULL
     grp <- NULL
-    x <- c(x, x.value[1,])
-    y <- c(y, y.value[1,])
-    data <- data.frame(x.value=x, y.value=y)
+    x <- c(x, xValue[1,])
+    y <- c(y, yValue[1,])
+    data <- data.frame(xValue=x, yValue=y)
     # Plot each path
-    plot <- ggplot(aes(x=x.value, y=y.value), data=data) +
+    plot <- ggplot(aes(x=xValue, y=yValue), data=data) +
       geom_path()+
       geom_point(size=2) +
       ggtitle("Number of Events vs. Time")+
@@ -466,9 +473,9 @@ shinyServer(function(input, output, session) {
         panel.grid.minor = element_blank(),
         legend.position="none"
       ) +
-      scale_y_continuous(limits = c(0, max(y.value)*1.1), 
+      scale_y_continuous(limits = c(0, max(yValue)*1.1), 
                          expand = expansion(mult = 0, add = c(0,0.05))) +
-      scale_x_continuous(limits = c(0, max(x.value)*1.1), 
+      scale_x_continuous(limits = c(0, max(xValue)*1.1), 
                          expand = expansion(mult = 0, add = c(0,0.05))) 
     
     plot
@@ -549,7 +556,7 @@ shinyServer(function(input, output, session) {
             width = 30)
       })
       output$textFeedback <- renderUI ({
-        "Try Again."
+        "Please try again"
       })
       score$prob <- score$prob-.5
     }
@@ -584,7 +591,7 @@ shinyServer(function(input, output, session) {
             width = 30)
       })
       output$textFeedbackT <- renderUI ({
-        "Try Again."
+        "Please try again"
       })
       score$probT <- score$probT-.5
     }
@@ -650,7 +657,7 @@ shinyServer(function(input, output, session) {
   
   # Reset button for timed game
   observeEvent(input$resetTimedGame, {
-    timer$value <- 60
+    timer$value <- 90
     output$countdown <- renderText({paste("Time:", timer$value)})
     shinyjs::enable("submitT")
     shinyjs::enable("nextT")
@@ -689,7 +696,7 @@ shinyServer(function(input, output, session) {
       })
   
   output$gamePracticePlotAlt <- renderUI({
-    arrivalTimes <- toString(round(dataGame()$x.value, 2))
+    arrivalTimes <- toString(round(dataGame()$xValue, 2))
     tags$script(HTML(
       paste0("$(document).ready(function() {
             document.getElementById('gamePlot2').setAttribute('aria-label',
@@ -700,7 +707,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$gameTimedPlotAlt <- renderUI({
-    arrivalTimes <- toString(round(dataGame()$x.value, 2))
+    arrivalTimes <- toString(round(dataGame()$xValue, 2))
     tags$script(HTML(
       paste0("$(document).ready(function() {
             document.getElementById('plot2T').setAttribute('aria-label',
