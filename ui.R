@@ -12,14 +12,23 @@ APP_DESCP  <<- "This app explores the nonhomogeneous poisson process through sim
 
 # End App Meta Data------------------------------------------------------------
 dashboardPage(
-dashboardHeader(title = "Nonhomogeneous Pois.", titleWidth = 250,
-                         tags$li(class = "dropdown", 
-                                 actionLink("info", 
-                                            icon("info"))),
-                         tags$li(class = "dropdown",
-                                 tags$a(href = "https://shinyapps.science.psu.edu/",
-                                        icon("home", lib = "font-awesome")))
-                         ),
+dashboardHeader(
+  title = "Nonhomogeneous Pois.", 
+  titleWidth = 250,
+  tags$li(class = "dropdown", 
+          actionLink("info", 
+                     icon("info"))),
+  tags$li(
+    class = "dropdown",
+    tags$a(target = "_blank", icon("comments"),
+           href = "https://pennstate.qualtrics.com/jfe/form/SV_7TLIkFtJEJ7fEPz?appName=Nonhomogeneous_Poisson_Process"
+    )
+  ),  
+  
+  tags$li(class = "dropdown",
+          tags$a(href = "https://shinyapps.science.psu.edu/",
+                 icon("home", lib = "font-awesome")))
+),
 
 dashboardSidebar(
   width=250,
@@ -118,7 +127,7 @@ dashboardBody(
     ########################### Exploration activity ################################
     tabItem(tabName = "exp",
             fluidPage(
-              titlePanel("Simluation Plot for Nonhomogeneous Poisson Process"),
+              titlePanel("Simulation Plot for Nonhomogeneous Poisson Process"),
               p("Explore the nonhomogeneous poisson process by choosing an 
               intensity function for the process then manipulating the parameters 
               of the function as well as the number of events and number of paths. 
@@ -232,7 +241,7 @@ dashboardBody(
                     select which lambda function was used to generate the path 
                     shown. You get 1 point for each correct answer with a .5 
                     point penalty on your problem score for every incorrect 
-                  ` guess."),
+                    guess."),
                     p("For the timed game, to begin the game, click the Start 
                     Game button. Then, for each plot, use the drop down to select 
                     which lambda function was used to generate the path shown. 
