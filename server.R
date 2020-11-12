@@ -9,17 +9,25 @@ shinyServer(function(input, output, session) {
   # Reactive Values to score game information
   score <- reactiveValues(val=0, prob=1, valT=0, probT=1)
   timer <- reactiveValues(run=FALSE, value=90, paused=FALSE)
-  params <- reactiveValues(constant=1, lambdatype="constant", 
+  params <- reactiveValues(constant=1, lambdatype="constant",
                            slope=1, growth=1, coefficient=.05)
-  
+
   # Explore Button
   observeEvent(input$goover, {
-    updateTabItems(session, "tabs", "exp")
+    updateTabItems(
+      session = session,
+      inputId = "pages",
+      selected = "exp"
+    )
   })
-  
+
   # Go to Prereqs button
   observeEvent(input$bsButton1, {
-    updateTabItems(session, "tabs", "exp")
+    updateTabItems(
+      session = session,
+      inputId = "pages",
+      selected = "exp"
+    )
   })
 
   # Info Button
@@ -27,58 +35,64 @@ shinyServer(function(input, output, session) {
     sendSweetAlert(
       session = session,
       title = "Instructions:",
-      text = "This app explores the Non-homogeneous Poisson Process. After 
-      reviewing the Prerequisites page, go to the Explore page to explore how 
-      the rate and number of events influence the behavior of the process for 
-      various intensity functions. The first graph shows the intensity. The 
-      second graph graphs the number of events. The third graph shows the 
-      residuals. The fourth graph shows the estimated density function of the 
+      text = "This app explores the Non-homogeneous Poisson Process. After
+      reviewing the Prerequisites page, go to the Explore page to explore how
+      the rate and number of events influence the behavior of the process for
+      various intensity functions. The first graph shows the intensity. The
+      second graph graphs the number of events. The third graph shows the
+      residuals. The fourth graph shows the estimated density function of the
       interarrival times.",
       type = "info"
     )
   })
-  
+
   # Description (if checkbox is checked)
   output$design <- renderUI({
-      p(withMathJax("This plot was generated from an exponential prior 
-      distribution. X-axis represents t and Y-axis represents N(t). In the plot, 
-      you can see that the rate \\(\\lambda\\) multiplied by time (t) roughly 
+    p(withMathJax("This plot was generated from an exponential prior
+      distribution. X-axis represents t and Y-axis represents N(t). In the plot,
+      you can see that the rate \\(\\lambda\\) multiplied by time (t) roughly
       equals to the number of events up to t (N(t))."))
   })
-  
+
   # Go button for game
-  observeEvent(input$bsButton4,{updateTabItems(session, "game", "fib")})
-  
+  observeEvent(input$bsButton4, {
+    updateTabItems(
+      session = session,
+      inputId = "game",
+      selected = "fib"
+      )
+  })
+
   # Simulates data for process (so same data can be used for all plots)
   data <- reactive({
     # linear lambda function: t/3
     if (input$lambdatype=='linear'){
       timeFun <- function(y, time){
         (sqrt((2/input$slope)*(y+(input$slope/2)*time^2)))}}
-    
+
     # exponential lambda function: exp{3t}
     else if (input$lambdatype=='exponential'){
       timeFun <- function(y, time){(
         1/input$growth)*log(input$growth*y+exp(input$growth*time))}}
-    
+
     # inverse lambda function: 1/1+3t
     else if (input$lambdatype=='inverse'){
       timeFun <- function(y, time){
         (((1+input$coefficient*time)*
             exp(input$coefficient*y)-1)/input$coefficient)}}
-    
+
     # constant lambda function: 3
     else if (input$lambdatype=='constant'){
       timeFun <- function(y, time)((y/input$constant)+time)}
     else{
       timeFun <- function(y, time)(0)
     }
-    
+
     # Set up matrices to hold all simulated values
     xValue <- matrix(0, nrow = input$path, ncol = input$nevent)
     yValue <- matrix(0, nrow = input$path, ncol = input$nevent)
     resiValue <- matrix(0, nrow = input$path, ncol = input$nevent)
-    
+
     # Run simulation for each path
     for (j in 1:input$path){
       Y <- rexp(input$nevent,1)
@@ -98,7 +112,7 @@ shinyServer(function(input, output, session) {
       # Take integrals of intensity function
       for (k in m){
         int_lambda <- append(int_lambda,
-                           integrate(intensity(), lower = 0, upper = k)$value)
+                             integrate(intensity(), lower = 0, upper = k)$value)
       }
       resi <- (h-int_lambda)
       xValue[j,] <- m
@@ -108,53 +122,54 @@ shinyServer(function(input, output, session) {
     # returns a data frame with the three values to be used in the various plots
     list(xValue=xValue, yValue=yValue, resiValue=resiValue)
   })
-  
+
   # Gives the intensity function
   intensity <- reactive({
     ## linear lambda function: t/3
     if (input$lambdatype=='linear'){
       intensity <- function(t) ((input$slope) * t)}
-    
+
     ## exponential lambda function: exp{3t}
     else if (input$lambdatype=='exponential'){
       intensity <- function(t)(exp(input$growth*t))}
-    
+
     ## inverse lambda function: 1/1+3t
     else if (input$lambdatype=='inverse'){
       intensity <- function(t) (1/(1+input$coefficient*t))}
-    
+
     ## constant lambda function: 3
     else if (input$lambdatype=='constant'){
       intensity <- function(t)(input$constant*t^0)}
     intensity
   })
-  
+
   # Plot intensity function
   output$plot1 <- renderPlot({
-    plot <- ggplot(data = data.frame(x = 0), mapping = aes(x = x)) + 
-      stat_function(fun=intensity(), size=1) + 
+    plot <- ggplot(data = data.frame(x = 0), mapping = aes(x = x)) +
+      stat_function(fun=intensity(), size=1) +
       xlab("Time (t)") +
       ylab("Lambda(t)") +
       ggtitle("Intensity Function") +
-      scale_x_continuous(limits = c(0, max(data()$xValue)*1.1), 
+      scale_x_continuous(limits = c(0, max(data()$xValue)*1.1),
                          expand = expansion(mult = 0, add = c(0,0.05))) +
       theme_bw() +
-      theme(axis.text = element_text(size=18),
-            plot.title = element_text(size=18, face="bold"),
-            axis.title = element_text(size=18),
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank()
-            )
+      theme(
+        axis.text = element_text(size=18),
+        plot.title = element_text(size=18),
+        axis.title = element_text(size=18),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+      )
     if(input$lambdatype=="constant"){
       plot <- plot + ylim(c(input$constant-1, input$constant+1))
     }
     else{
-      plot <- plot + 
+      plot <- plot +
         scale_y_continuous(expand = expansion(mult = 0, add = c(0,0.05)))
     }
     plot
-    })
-  
+  })
+
   # Plot events
   output$plot2 <- renderPlot({
     # Set up data
@@ -172,11 +187,11 @@ shinyServer(function(input, output, session) {
     data <- data.frame(xValue=x, yValue=y, group=grp)
 
     # Plot each path
-    plot <- ggplot(aes(x=xValue, 
-                     y=yValue, 
-                     group=as.factor(group), 
-                     color=as.factor(group)), 
-                 data=data) +
+    plot <- ggplot(aes(x=xValue,
+                       y=yValue,
+                       group=as.factor(group),
+                       color=as.factor(group)),
+                   data=data) +
       geom_point(size=2) +
       ggtitle("Number of Events vs. Time")+
       xlab("Time (t)") +
@@ -184,87 +199,88 @@ shinyServer(function(input, output, session) {
       theme_bw() +
       theme(
         axis.text = element_text(size=18),
-        plot.title = element_text(size=18, face="bold"),
+        plot.title = element_text(size=18),
         axis.title = element_text(size=18),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         plot.caption = element_text(hjust = 0, size=14),
         legend.position="none"
       ) +
-      scale_y_continuous(limits = c(0, max(yValue)*1.1), 
+      scale_y_continuous(limits = c(0, max(yValue)*1.1),
                          expand = expansion(mult = 0, add = c(0,0.05))) +
-      scale_x_continuous(limits = c(0, max(xValue)*1.1), 
+      scale_x_continuous(limits = c(0, max(xValue)*1.1),
                          expand = expansion(mult = 0, add = c(0,0.05))) +
       scale_color_manual(values = boastPalette[c(1:4, 6)])
     # Only include the s and s+t if there are at least 2 events
     if(input$nevent>1){
       plot <- plot+
         geom_path()+
-        geom_segment(aes(x=xValue[point], 
-                         y=point, 
-                         xend=xValue[point*2], 
-                         yend=point), color="black", 
+        geom_segment(aes(x=xValue[point],
+                         y=point,
+                         xend=xValue[point*2],
+                         yend=point), color="black",
                      linetype=2)+
-        geom_segment(aes(x=xValue[point], 
-                         y=point/2,  
-                         xend=xValue[point], 
-                         yend= point), 
-                     color="black", 
+        geom_segment(aes(x=xValue[point],
+                         y=point/2,
+                         xend=xValue[point],
+                         yend= point),
+                     color="black",
                      linetype=2)+
-        geom_segment(aes(x=xValue[point*2],  
-                         y=point/2,  
-                         xend=xValue[point*2], 
-                         yend=point*2), 
-                     color="black", 
+        geom_segment(aes(x=xValue[point*2],
+                         y=point/2,
+                         xend=xValue[point*2],
+                         yend=point*2),
+                     color="black",
                      linetype=2)+
-        geom_segment(aes(x=xValue[point*2], 
-                         y=point, 
-                         xend=xValue[point*2]+max(xValue)*.1, 
+        geom_segment(aes(x=xValue[point*2],
+                         y=point,
+                         xend=xValue[point*2]+max(xValue)*.1,
                          yend=point),
-                     color="black", 
+                     color="black",
                      size=.75)+
-        geom_segment(aes(x=xValue[point*2], 
-                         y=point*2, 
-                         xend=xValue[point*2]+max(xValue)*.1, 
-                         yend=point*2), 
-                     color="black", 
+        geom_segment(aes(x=xValue[point*2],
+                         y=point*2,
+                         xend=xValue[point*2]+max(xValue)*.1,
+                         yend=point*2),
+                     color="black",
                      size=.75)+
-        geom_segment(aes(x=xValue[point*2]+max(xValue)*.05,  
-                         y=point,   
+        geom_segment(aes(x=xValue[point*2]+max(xValue)*.05,
+                         y=point,
                          xend=xValue[point*2]+max(xValue)*.05,
                          yend= point*2),
-                     arrow=arrow(length=unit(.4,"cm")), 
-                     color="black", 
+                     arrow=arrow(length=unit(.4,"cm")),
+                     color="black",
                      size=.75)+
-        geom_segment(aes(x=xValue[point*2]+max(xValue)*.05,  
-                         y=point*2, xend=xValue[point*2]+max(xValue)*.05,  
+        geom_segment(aes(x=xValue[point*2]+max(xValue)*.05,
+                         y=point*2, xend=xValue[point*2]+max(xValue)*.05,
                          yend=point),
-                     arrow=arrow(length=unit(.4,"cm")), 
-                     color="black", 
+                     arrow=arrow(length=unit(.4,"cm")),
+                     color="black",
                      size=.75)+
-        geom_text(aes(xValue[point], 
-                      y = point/3, 
+        geom_text(aes(xValue[point],
+                      y = point/3,
                       label = 's'),
                   color="black")+
-        geom_text(aes(xValue[point*2]+.01*max(xValue), 
+        geom_text(aes(xValue[point*2]+.01*max(xValue),
                       y = point/3,
                       label = 's+t'),
                   color="black")
     }
     plot
   })
-  
+
   # Text to go with second plot
   output$plot2Text <- renderUI({
-  p(withMathJax("
-           The above Number of Events vs. Time plot is for a Nonhomogeneous Poisson 
-           Plot. In the plot, you can see that the rate \\(\\lambda\\) multiplied 
-           by time (t) roughly equals to the number of events up to t (N(t)). The 
-           distance between points on the graph is N(t+s)-N(s), which is a Poisson 
-           distribution with parameter m(t+s)-m(s). m(t+s) can be calculated by 
-           integrating our lambda function from 0 to t+s, while m(s) is integrating 
-           the lambda function from 0 to s."))})
-  
+    p(withMathJax("
+           The above Number of Events vs. Time plot is for a Nonhomogeneous Poisson
+           Plot. In the plot, you can see that the rate \\(\\lambda\\) multiplied
+           by time (t) roughly equals to the number of events up to t (N(t)). The
+           distance between points on the graph is N(t+s)-N(s), which is a Poisson
+           distribution with parameter m(t+s)-m(s). m(t+s) can be calculated by
+           integrating our lambda function from 0 to t+s, while m(s) is integrating
+           the lambda function from 0 to s."))
+  })
+
   # Residual Plot
   output$plot3 <- renderPlot({
     # Get data values
@@ -281,11 +297,11 @@ shinyServer(function(input, output, session) {
     data <- data.frame(xValue=x, yValue=y, group=grp)
 
     # Plot each path
-    plot <- ggplot(aes(x=xValue, 
-                     y=yValue, 
-                     group=as.factor(group), 
-                     color=as.factor(group)), 
-                 data=data) +
+    plot <- ggplot(aes(x=xValue,
+                       y=yValue,
+                       group=as.factor(group),
+                       color=as.factor(group)),
+                   data=data) +
       geom_point(size=2) +
       geom_hline(aes(yintercept=0), linetype="dashed", size=1) +
       ggtitle("Residuals vs. Time") +
@@ -294,21 +310,21 @@ shinyServer(function(input, output, session) {
       theme_bw()+
       theme(
         axis.text = element_text(size=18),
-        plot.title = element_text(size=18, face="bold"),
+        plot.title = element_text(size=18),
         axis.title = element_text(size=18),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         legend.position="none") +
       scale_color_manual(values = boastPalette[c(1:4, 6)])+
-      scale_x_continuous(limits = c(0, max(xValue)*1.1), 
-                         expand = expansion(mult = 0, add = c(0,0.05))) 
-    
+      scale_x_continuous(limits = c(0, max(xValue)*1.1),
+                         expand = expansion(mult = 0, add = c(0,0.05)))
+
     if(input$nevent>1){
-      plot <- plot + geom_path() 
+      plot <- plot + geom_path()
     }
     plot
   })
-  
+
   # Density Plot
   output$plot4 <- renderPlot({
     # Set up data frames
@@ -316,7 +332,7 @@ shinyServer(function(input, output, session) {
     interArr <- data.frame()
     Int <- data.frame()
     Group <- data.frame()
-    
+
     # Fill in intervals and path number data frame for plotting
     for (i in 1:input$path){
       for (j in 1:input$nevent){
@@ -326,22 +342,22 @@ shinyServer(function(input, output, session) {
       interArr <- cbind(Int,Group)
     }
     names(interArr) <- c("Int","Group")
-    
+
     # Create actual plot
     plot <- ggplot(interArr,
-           aes(
-             x = Int,
-             group = Group,
-             color = as.factor(Group),
-             adjust = 2
-           )) +
+                   aes(
+                     x = Int,
+                     group = Group,
+                     color = as.factor(Group),
+                     adjust = 2
+                   )) +
       ggtitle("Estimated Interarrival Time Distribution") +
       xlab("Interarrival Time") +
       ylab("Estimated Density") +
       labs(color = "Path") +
       theme(
         axis.text = element_text(size=18),
-        plot.title = element_text(size=18, face="bold"),
+        plot.title = element_text(size=18),
         axis.title = element_text(size=18),
         panel.background = element_rect(fill = 'white', colour = 'black'),
         panel.grid.major = element_blank(),
@@ -351,18 +367,18 @@ shinyServer(function(input, output, session) {
       scale_y_continuous(expand = expansion(mult = c(0, 0.05), add = 0)) +
       scale_x_continuous(expand = expansion(mult = c(0, 0.05), add = 0)) +
       scale_color_manual(values = boastPalette[c(1:4, 6)])
-      if(input$nevent>1){
-        plot <- plot + stat_density(geom = "line", size = 1,position='identity')
-      }
+    if(input$nevent>1){
+      plot <- plot + stat_density(geom = "line", size = 1,position='identity')
+    }
     plot
-    })
-  
-  # Warning message for single sample interarrival times  
+  })
+
+  # Warning message for single sample interarrival times
   output$feedback = renderPrint({
-    if (input$nevent==1) {cat("Warning: You need more than one event in order to 
+    if (input$nevent==1) {cat("Warning: You need more than one event in order to
                               estimate the density of interarrival times.")}
   })
-  
+
   dataGame <- reactive({
     # linear lambda function: t/3
     if (params$lambdatype=='linear'){
@@ -407,7 +423,7 @@ shinyServer(function(input, output, session) {
     # Take integrals of intensity function
     for (k in m){
       int_lambda <- append(int_lambda,
-                         integrate(intensityGame(), lower = 0, upper = k)$value)
+                           integrate(intensityGame(), lower = 0, upper = k)$value)
     }
     resi <- (h-int_lambda)
     xValue[1,] <- m
@@ -422,31 +438,31 @@ shinyServer(function(input, output, session) {
     ## linear lambda function: t/3
     if (params$lambdatype=='linear'){
       intensity <- function(t) ((params$slope) * t)}
-    
+
     ## exponential lambda function: exp{3t}
     else if (params$lambdatype=='exponential'){
       intensity <- function(t)(exp(params$growth*t))}
-    
+
     ## inverse lambda function: 1/1+3t
     else if (params$lambdatype=='inverse'){
       intensity <- function(t) (1/(1+params$coefficient*t))}
-    
+
     ## constant lambda function: 3
     else if (params$lambdatype=='constant'){
       intensity <- function(t)(params$constant*t^0)}
     intensity
   })
-  
+
   # Shows game scores for practice and Timed mode
   output$score <- renderText({paste("Score:", score$val)})
   output$scoreT <- renderText({paste("Score:", score$valT)})
-  
+
   # Creates the plots for the game (practice and timed mode)
   output$gamePlot2 <- renderPlot({makePlot()})
   output$plot2T <- renderPlot({makePlot()})
-  
+
   # Makes actual plot for game section
-  makePlot <- reactive({    
+  makePlot <- reactive({
     # Set up data
     xValue <- dataGame()$xValue
     yValue <- dataGame()$yValue
@@ -467,36 +483,36 @@ shinyServer(function(input, output, session) {
       theme_bw()+
       theme(
         axis.text = element_text(size=18),
-        plot.title = element_text(size=18, face="bold"),
+        plot.title = element_text(size=18),
         axis.title = element_text(size=18),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         legend.position="none"
       ) +
-      scale_y_continuous(limits = c(0, max(yValue)*1.1), 
+      scale_y_continuous(limits = c(0, max(yValue)*1.1),
                          expand = expansion(mult = 0, add = c(0,0.05))) +
-      scale_x_continuous(limits = c(0, max(xValue)*1.1), 
-                         expand = expansion(mult = 0, add = c(0,0.05))) 
-    
+      scale_x_continuous(limits = c(0, max(xValue)*1.1),
+                         expand = expansion(mult = 0, add = c(0,0.05)))
+
     plot
   })
-  
+
   # Updates that occur hitting next button in practice mode
   observeEvent(input$nextX, {
-    params$lambdatype <- sample(c("constant", "exponential", "linear", "inverse"), 
-                              size = 1, 
-                              replace=TRUE)
+    params$lambdatype <- sample(c("constant", "exponential", "linear", "inverse"),
+                                size = 1,
+                                replace=TRUE)
     if(params$lambdatype=="constant"){
-      params$constant <- runif(1,1,10)   
+      params$constant <- runif(1,1,10)
     }
     else if(params$lambdatype=="exponential"){
-      params$growth <- runif(1,.1,1) 
+      params$growth <- runif(1,.1,1)
     }
     else if(params$lambdatype=="linear"){
-      params$slope <- runif(1,.1,1) 
+      params$slope <- runif(1,.1,1)
     }
     else{
-      params$coefficient <- runif(1,.01,.05) 
+      params$coefficient <- runif(1,.01,.05)
     }
     score$prob <- 1
     shinyjs::hideElement("challengeFeedback")
@@ -504,23 +520,23 @@ shinyServer(function(input, output, session) {
     shinyjs::enable("submitX")
     updateSelectInput(session, "challengeChoice", selected="Select Answer")
   })
-  
+
   # Updates that occur hitting next button in timed mode
   observeEvent(input$nextT, {
-    params$lambdatype <- sample(c("constant", "exponential", "linear", "inverse"), 
-                              size = 1, 
-                              replace=TRUE)
+    params$lambdatype <- sample(c("constant", "exponential", "linear", "inverse"),
+                                size = 1,
+                                replace=TRUE)
     if(params$lambdatype=="constant"){
-      params$constant <- runif(1,1,10)   
+      params$constant <- runif(1,1,10)
     }
     else if(params$lambdatype=="exponential"){
-      params$growth <- runif(1,.1,1) 
+      params$growth <- runif(1,.1,1)
     }
     else if(params$lambdatype=="linear"){
-      params$slope <- runif(1,.1,1) 
+      params$slope <- runif(1,.1,1)
     }
     else{
-      params$coefficient <- runif(1,.01,.05) 
+      params$coefficient <- runif(1,.01,.05)
     }
     score$probT <- 1
     shinyjs::hideElement("challengeFeedbackT")
@@ -529,16 +545,16 @@ shinyServer(function(input, output, session) {
     shinyjs::disable("nextT")
     updateSelectInput(session, "challengeChoiceT", selected="Select Answer")
   })
-  
+
   # Updates that occur hitting submit button in practice mode
   observeEvent(input$submitX, {
     # If correct
     if (input$challengeChoice == params$lambdatype) {
       output$challengeFeedback <- renderUI ({
-            img(src = 'check.PNG',
-                alt = "Correct Answer",
-                height = 30, 
-                width = 30)
+        img(src = 'check.PNG',
+            alt = "Correct Answer",
+            height = 30,
+            width = 30)
       })
       output$textFeedback <- renderUI ({ #UI
         'Congratulations!'
@@ -550,7 +566,7 @@ shinyServer(function(input, output, session) {
     # If incorrect
     else {
       output$challengeFeedback <- renderUI ({
-        img(src = 'cross.PNG', 
+        img(src = 'cross.PNG',
             alt = "Incorrect Answer",
             height = 30,
             width = 30)
@@ -563,7 +579,7 @@ shinyServer(function(input, output, session) {
     shinyjs::showElement("challengeFeedback")
     shinyjs::showElement('textFeedback')
   })
-  
+
   # Updates that occur hitting submit button in timed mode
   observeEvent(input$submitT, {
     # If correct, move to next problem
@@ -571,7 +587,7 @@ shinyServer(function(input, output, session) {
       output$challengeFeedbackT <- renderUI ({
         img(src = 'check.PNG',
             alt = "Correct Answer",
-            height = 30, 
+            height = 30,
             width = 30)
       })
       output$textFeedbackT <- renderUI ({ #UI
@@ -587,7 +603,7 @@ shinyServer(function(input, output, session) {
       output$challengeFeedbackT <- renderUI ({
         img(src = 'cross.png',
             alt = "Incorrect Answer",
-            height = 30, 
+            height = 30,
             width = 30)
       })
       output$textFeedbackT <- renderUI ({
@@ -598,14 +614,14 @@ shinyServer(function(input, output, session) {
     shinyjs::showElement('textFeedbackT')
     shinyjs::showElement("challengeFeedbackT")
   })
-  
+
   # Controls Timer
   observe({
     invalidateLater(1000)
     isolate(
       if(timer$run){
         # Pauses the game if the user switches off the game tab
-        if(input$game != "time" || input$tabs != "Game"){
+        if(input$game != "time" || input$pages != "Game"){
           click("stopTimedGame")
         }
         timer$value <- timer$value-1
@@ -621,14 +637,14 @@ shinyServer(function(input, output, session) {
           sendSweetAlert(
             session = session,
             title = paste("Final Score: ", score$valT),
-            text = ifelse(score$valT<5, "Try again for a better score.", 
+            text = ifelse(score$valT<5, "Try again for a better score.",
                           ifelse(score$valT<10, "Good work",
                                  "Great Job!"))
           )
         }}
     )
   })
-  
+
   # Starts timed game
   observeEvent(input$startTimedGame, {
     timer$run <- TRUE
@@ -639,11 +655,11 @@ shinyServer(function(input, output, session) {
     shinyjs::disable("resetTimedGame")
     shinyjs::enable("stopTimedGame")
   })
-  
+
   # Displays the timer
   output$countdown <- renderText({
     paste("Time:", timer$value)})
-  
+
   # Stop button for timed game
   observeEvent(input$stopTimedGame, {
     shinyjs::enable("submitT")
@@ -654,7 +670,7 @@ shinyServer(function(input, output, session) {
     timer$run <- FALSE
     timer$paused <- TRUE
   })
-  
+
   # Reset button for timed game
   observeEvent(input$resetTimedGame, {
     timer$value <- 90
@@ -666,55 +682,55 @@ shinyServer(function(input, output, session) {
     score$probT <- 1
     timer$paused <- FALSE
   })
-  
+
   # Reset button for practice mode
   observeEvent(input$resetPractice,{
-    score$val <- 0 
+    score$val <- 0
     score$prob <- 1
     click("nextX")
   })
-  
+
   output$pauseMessage <- renderText({
     if(timer$paused){
-       "The game is currently paused."
+      "The game is currently paused."
     }
   })
-  
+
   # Tells UI whether or not to show the timed game game portion
   output$showGame <- reactive({timer$run})
-  outputOptions(output, "showGame", suspendWhenHidden=FALSE) 
-  
-  
-  # Alt text 
+  outputOptions(output, "showGame", suspendWhenHidden=FALSE)
+
+
+  # Alt text
   output$plot1Alt <- renderUI({
-    text <- paste("`This plot shows a ", input$lambdatype, "function, which 
+    text <- paste("`This plot shows a ", input$lambdatype, "function, which
                   represents that intensity function for the graph.`")
-    tags$script(HTML(paste0("$(document).ready(function() { 
+    tags$script(HTML(paste0("$(document).ready(function() {
                             document.getElementById('plot1').setAttribute('aria-label',",
                             text, ")})"))
-  )
-      })
-  
+    )
+  })
+
   output$gamePracticePlotAlt <- renderUI({
     arrivalTimes <- toString(round(dataGame()$xValue, 2))
     tags$script(HTML(
       paste0("$(document).ready(function() {
             document.getElementById('gamePlot2').setAttribute('aria-label',
             `This plot shows the path taken by the run generated for
-            the problem. For this problem, the arrival times are ",  
-            arrivalTimes, "`)})"
-    )))
+            the problem. For this problem, the arrival times are ",
+             arrivalTimes, "`)})"
+      )))
   })
-  
+
   output$gameTimedPlotAlt <- renderUI({
     arrivalTimes <- toString(round(dataGame()$xValue, 2))
     tags$script(HTML(
       paste0("$(document).ready(function() {
             document.getElementById('plot2T').setAttribute('aria-label',
             `This plot shows the path taken by the run generated for
-            the problem. For this problem, the arrival times are ",  
+            the problem. For this problem, the arrival times are ",
              arrivalTimes, "`)})"
       )))
   })
-  
+
 })
